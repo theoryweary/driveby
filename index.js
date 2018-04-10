@@ -8,6 +8,8 @@ import { phonecall } from 'react-native-communications';
 import Header from './src/common/Header';
 import { Card, CardSection, Button } from './src/common';
 
+import FileHandler from './src/components/FileHandler';
+
 
 const phoneList = [
   { name: 'Walter Melon',
@@ -34,6 +36,8 @@ export class App extends Component {
   }
 
   render() {
+    FileHandler.test();
+
 
     //RNImmediatePhoneCall.immediatePhoneCall('0123456789');
       return (
