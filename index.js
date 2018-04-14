@@ -3,8 +3,7 @@
 import React, { Component } from 'react';
 import { AppRegistry, View } from 'react-native';
 import { phonecall } from 'react-native-communications';
-//import RNImmediatePhoneCall from 'react-native-immediate-phone-call';
-// or https://www.npmjs.com/package/react-native-immediate-phone-call ?
+
 import Header from './src/common/Header';
 import { Card, CardSection, Button } from './src/common';
 
@@ -37,8 +36,9 @@ export class App extends Component {
 
   render() {
     FileHandler.test();
-
-
+    console.log('First');
+    console.log(this.props);
+    console.log('DriveBy!');
     //RNImmediatePhoneCall.immediatePhoneCall('0123456789');
       return (
         <View>
