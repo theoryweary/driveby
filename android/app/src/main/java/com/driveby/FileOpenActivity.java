@@ -34,7 +34,7 @@ public class FileOpenActivity extends ReactActivity {
         getIntent().setData(null);
 
         try {
-          b.putString("test_key", data.toString());
+          b.putString("fileName", data.toString());
           Log.w("#############", data.toString());
           return b;
         } catch (Exception e) {
