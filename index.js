@@ -7,18 +7,8 @@ import { phonecall } from 'react-native-communications';
 import RNFS from 'react-native-fs';
 import Papa from 'papaparse';
 
-import { Card, CardSection, Button } from './src/common';
-import Header from './src/common/Header';
-
-
-//import FileHandler from './src/components/FileHandler';
-
-
-// const phoneList = [
-//   { name: 'Walter Melon',
-//   number:	'(978) 709-1111' },
-//   { name: 'Nick R. Bocker',
-//   number: '(978) 709-2222' }];
+import { Card, CardSection, Button, Header } from './src/common';
+//import Router from './src/router';
 
 // create a component
 export class App extends Component {
@@ -26,11 +16,11 @@ export class App extends Component {
     super(props);
     this.state = {
       index: 0,
-      phoneList: []
+      numContacts: 0,
+      phoneList: [['', '']]
      };
-
      console.log(this.props.fileName);
-    this.parseFile(this.props.fileName);
+     this.parseFile(this.props.fileName);
   }
 
   onTextPress() {
@@ -40,12 +30,20 @@ export class App extends Component {
 
   parseFile(filePath) {
     //const filePath = 'content://com.android.externalstorage.documents/document/primary%3ADownload%2FdrivebyContacts.csv';
-    RNFS.readFile(filePath).then((contents) => {
-      console.log(contents);
-      this.setState({
-        phoneList: Papa.parse(contents).data
+    try {
+      RNFS.readFile(filePath).then((contents) => {
+        console.log(contents);
+        this.setState({
+          phoneList: Papa.parse(contents).data
+        });
+        //Set numContacts after loading the phonelist
+        this.setState({
+          numContacts: this.state.phoneList.length
+        });
       });
-    });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   circularIncrement() {
@@ -57,28 +55,30 @@ export class App extends Component {
   }
 
   render() {
-    console.log('First');
-    console.log(this.props);
-    console.log('DriveBy!');
-    console.log(this.state.phoneList);
+    // console.log(this.props);
+    // console.log(this.state.phoneList);
     //RNImmediatePhoneCall.immediatePhoneCall('0123456789');
       return (
+//        <driveByHome />
+
         <View>
           <Header style={{ flex: 1 }} headerText={'Driveby'} />
           <Card>
-            <CardSection>
-                <Button>
-                  Load CSV with Peeps to call
-                </Button>
-            </CardSection>
+          <CardSection>
+            <Text>
+              Name: {this.state.phoneList[this.state.index][0] }
+              {'\n'} Number: { this.state.phoneList[this.state.index][1] }
+              {'\n'} Contacts Loaded: { this.state.numContacts }
+              {'\n'} # Contacts left to call: { this.state.numContacts
+                  - this.state.index }
+            </Text>
+          </CardSection>
 
             <CardSection>
                 <Button onPress={this.onTextPress.bind(this)}>
-                   Call Next Person
+                   Call {this.state.phoneList[this.state.index][0] }
                 </Button>
             </CardSection>
-
-
 
             <CardSection>
                 <Button>
@@ -91,5 +91,5 @@ export class App extends Component {
   }
 }
 
-// render it to the device
+// render our component to the device
 AppRegistry.registerComponent('driveby', () => App);
