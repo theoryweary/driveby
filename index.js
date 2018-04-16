@@ -1,22 +1,32 @@
-
-// import a library to help create a component
 import React, { Component } from 'react';
-import { AppRegistry, View, Text } from 'react-native';
+import {
+  AppRegistry,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
+} from 'react-native';
 import { phonecall } from 'react-native-communications';
 
 import RNFS from 'react-native-fs';
 import Papa from 'papaparse';
 
-import { Card, CardSection, Button, Header } from './src/common';
-//import Router from './src/router';
+//https://www.npmjs.com/package/react-native-table-component
+import { Table, Row, Rows } from 'react-native-table-component';
+
+import { Card, CardSection, Button } from './src/common';
+import Header from './src/common/Header';
+import Router from './src/router';
 
 // create a component
 export class App extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       index: 0,
       numContacts: 0,
+      tableHead: ['Name', 'Number'],
       phoneList: [['', '']]
      };
      console.log(this.props.fileName);
@@ -59,21 +69,12 @@ export class App extends Component {
     // console.log(this.state.phoneList);
     //RNImmediatePhoneCall.immediatePhoneCall('0123456789');
       return (
-//        <driveByHome />
+        //https://github.com/StephenGrider/ReactNativeReduxCasts/blob/master/manager/src/Router.js
+  //      <Router />  // Just need to pass the state to DriveByHome and then we can use this
 
-        <View>
+        <View style={styles.mainViewStyle}>
           <Header style={{ flex: 1 }} headerText={'Driveby'} />
           <Card>
-          <CardSection>
-            <Text>
-              Name: {this.state.phoneList[this.state.index][0] }
-              {'\n'} Number: { this.state.phoneList[this.state.index][1] }
-              {'\n'} Contacts Loaded: { this.state.numContacts }
-              {'\n'} # Contacts left to call: { this.state.numContacts
-                  - this.state.index }
-            </Text>
-          </CardSection>
-
             <CardSection>
                 <Button onPress={this.onTextPress.bind(this)}>
                    Call {this.state.phoneList[this.state.index][0] }
@@ -86,10 +87,35 @@ export class App extends Component {
                 </Button>
             </CardSection>
           </Card>
+
+          <CardSection>
+            <Text>
+              Name: {this.state.phoneList[this.state.index][0] }
+              {'\n'} Number: { this.state.phoneList[this.state.index][1] }
+              {'\n'} Contacts Loaded: { this.state.numContacts }
+              {'\n'} # Contacts left to call: { this.state.numContacts
+                  - this.state.index }
+            </Text>
+          </CardSection>
+
+          <ScrollView style={styles.scrollViewStyle}>
+            <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+              <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text} />
+              <Rows data={this.state.phoneList} textStyle={styles.text} />
+            </Table>
+          </ScrollView>
         </View>
      );
   }
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
+  head: { height: 40, backgroundColor: '#f1f8ff' },
+  text: { margin: 6 },
+  scrollViewStyle: { backgroundColor: '#51FA88' },
+  mainViewStyle: { backgroundColor: '#fff' } //#fff is white  https://htmlcolorcodes.com/
+});
 
 // render our component to the device
 AppRegistry.registerComponent('driveby', () => App);
