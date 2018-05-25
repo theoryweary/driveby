@@ -16,7 +16,8 @@ import { Table, Row, Rows } from 'react-native-table-component';
 
 import { Card, CardSection, Button } from './src/common';
 import Header from './src/common/Header';
-import Router from './src/router';
+//import Router from './src/router';
+//import DriveByHome from './src/components/DriveByHome.js';
 
 // create a component
 export class App extends Component {
@@ -32,12 +33,18 @@ export class App extends Component {
      console.log(this.props.fileName);
      this.parseFile(this.props.fileName);
   }
-
   onTextPress() {
     phonecall(this.state.phoneList[this.state.index][1], false);
     this.circularIncrement();
   }
 
+  circularIncrement() {
+    let newIndex = this.state.index + 1;
+    if (newIndex >= this.state.phoneList.length) {
+      newIndex = 0;
+    }
+    this.setState({ index: newIndex });
+  }
   parseFile(filePath) {
     //const filePath = 'content://com.android.externalstorage.documents/document/primary%3ADownload%2FdrivebyContacts.csv';
     try {
@@ -56,22 +63,14 @@ export class App extends Component {
     }
   }
 
-  circularIncrement() {
-    let newIndex = this.state.index + 1;
-    if (newIndex >= this.state.phoneList.length) {
-      newIndex = 0;
-    }
-    this.setState({ index: newIndex });
-  }
-
   render() {
     // console.log(this.props);
     // console.log(this.state.phoneList);
     //RNImmediatePhoneCall.immediatePhoneCall('0123456789');
       return (
         //https://github.com/StephenGrider/ReactNativeReduxCasts/blob/master/manager/src/Router.js
-  //      <Router />  // Just need to pass the state to DriveByHome and then we can use this
-
+    //    <Router />  // Need to pass the state to DriveByHome
+    //    <DriveByHome />
         <View style={styles.mainViewStyle}>
           <Header style={{ flex: 1 }} headerText={'Driveby'} />
           <Card>
