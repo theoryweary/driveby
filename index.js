@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { phonecall } from 'react-native-communications';
 
+import { PhoneCaller } from './src/components/NativeModules';
+
 import RNFS from 'react-native-fs';
 import Papa from 'papaparse';
 
@@ -34,7 +36,8 @@ export class App extends Component {
      this.parseFile(this.props.fileName);
   }
   onTextPress() {
-    phonecall(this.state.phoneList[this.state.index][1], false);
+//    phonecall(this.state.phoneList[this.state.index][1], false);
+    PhoneCaller.makeCall('7988956271');
     this.circularIncrement();
   }
 
