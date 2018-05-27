@@ -37,7 +37,7 @@ export class App extends Component {
   }
   onTextPress() {
 //    phonecall(this.state.phoneList[this.state.index][1], false);
-    PhoneCaller.makeCall('7988956271');
+    PhoneCaller.makeCall('tel:7988956271');
     this.circularIncrement();
   }
 

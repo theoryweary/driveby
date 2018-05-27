@@ -31,23 +31,25 @@
            <action android:name="android.intent.action.VIEW" />
            <category android:name="android.intent.category.DEFAULT" />
            <data android:scheme="file" />
-           <data android:scheme="content" />
            <data android:host="*" />
-           <data android:pathPattern=".*\\.csv" />
+
+          <data android:pathPattern=".*\\.csv" />
+          <data android:pathPattern=".*\\..*\\.csv" />
+          <data android:pathPattern=".*\\..*\\..*\\.csv" />
+          <data android:pathPattern=".*\\..*\\..*\\..*\\.csv" /> 
            <data android:mimeType="*/*" />
          </intent-filter>
+         <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="content" />
+            <data android:host="*" />
+            <data android:pathPattern=".*\\.csv" />
+            <data android:mimeType="application/octet-stream" />
+          </intent-filter>
       </activity>
 
-      <activity
-        android:name=".PhoneCallerActivity"
-        android:label="@string/app_name"
-        android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-        android:windowSoftInputMode="adjustResize">
-        <intent-filter>
-           <action android:name="android.intent.action.PHONECALLER" />
-           <category android:name="android.intent.category.DEFAULT" />
-         </intent-filter>
-      </activity>
+
 
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
 
