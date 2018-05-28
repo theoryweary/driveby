@@ -6,16 +6,13 @@ import {
   Text,
   View
 } from 'react-native';
-import { phonecall } from 'react-native-communications';
-
-import { PhoneCaller } from './src/components/NativeModules';
-
 import RNFS from 'react-native-fs';
+import { Table, Row, Rows } from 'react-native-table-component';
+//https://www.npmjs.com/package/react-native-table-component  - consider replacing this with NativeBase?
+
 import Papa from 'papaparse';
 
-//https://www.npmjs.com/package/react-native-table-component
-import { Table, Row, Rows } from 'react-native-table-component';
-
+import { PhoneCaller, TestExport } from './src/components/NativeModules';
 import { Card, CardSection, Button } from './src/common';
 import Header from './src/common/Header';
 //import Router from './src/router';
@@ -35,10 +32,15 @@ export class App extends Component {
      console.log(this.props.fileName);
      this.parseFile(this.props.fileName);
   }
+
+
+
   onTextPress() {
-//    phonecall(this.state.phoneList[this.state.index][1], false);
-    PhoneCaller.makeCall('tel:7988956271');
+//    phoneCaller.makeCall('tel:'`this.state.phoneList[this.state.index][1]`);
+    //PhoneCaller.makeCall('tel:7988956271');
     this.circularIncrement();
+
+    TestExport.testConsole();
   }
 
   circularIncrement() {
