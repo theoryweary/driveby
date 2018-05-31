@@ -11,12 +11,17 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import <Foundation/Foundation.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   NSURL *jsCodeLocation;
+
+  NSURL *url = (NSURL *)[launchOptions valueForKey:UIApplicationLaunchOptionsURLKey];
+  NSLog(@"NSLOG ############################");
+//  NSLog(url);
 
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
 
@@ -33,5 +38,31 @@
   [self.window makeKeyAndVisible];
   return YES;
 }
+
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+NSURL *jsCodeLocation;
+
+ NSDictionary *urlDict = [NSDictionary dictionaryWithObjectsAndKeys: @"url", url, nil];
+
+  NSLog(@"####################### Open URL");
+  NSLog(@"Open URL:\t%@\n" "From source:\t%@\n" "With annotation:%@", url, sourceApplication, annotation);  //url is shown here!
+  //NSString *filepath = [url path];
+   //...
+
+   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+
+   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
+                                                       moduleName:@"driveby"
+                                                initialProperties:urlDict
+                                                    launchOptions:urlDict];
+   rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
+
+   self.window.rootViewController.view = rootView;
+   [self.window makeKeyAndVisible];
+
+   return YES;
+ }
 
 @end

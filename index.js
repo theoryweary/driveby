@@ -21,6 +21,8 @@ import Header from './src/common/Header';
 // create a component
 export class App extends Component {
   constructor(props) {
+    console.log(props);
+    console.log('#############################');
     super(props);
 
     this.state = {
