@@ -19,9 +19,10 @@
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>csv</string>
+				<string>public.comma-separated-values-text</string>
 			</array>
 		</dict>
+		<dict/>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
