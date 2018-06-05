@@ -4,7 +4,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
+  Platform,
+  Linking
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import { Table, Row, Rows } from 'react-native-table-component';
@@ -34,15 +36,31 @@ export class App extends Component {
      console.log(this.props.fileName);
      this.parseFile(this.props.fileName);
   }
+  
+  componentDidMount() { // B
+    if (Platform.OS === 'android') {
+      // Linking.getInitialURL().then(url => {
+      //   this.navigate(url);
+      // });
+    } else {
+        Linking.addEventListener('url', this.handleOpenURL);
+      }
+    }
 
+    componentWillUnmount() { // C
+      Linking.removeEventListener('url', this.handleOpenURL);
+    }
 
+    onTextPress() {
+  //    phoneCaller.makeCall('tel:'`this.state.phoneList[this.state.index][1]`);
+      //PhoneCaller.makeCall('tel:7988956271');
+      this.circularIncrement();
 
-  onTextPress() {
-//    phoneCaller.makeCall('tel:'`this.state.phoneList[this.state.index][1]`);
-    //PhoneCaller.makeCall('tel:7988956271');
-    this.circularIncrement();
+      TestExport.testConsole();
+    }
 
-    TestExport.testConsole();
+  handleOpenURL = (event) => { // D
+    this.parseFile(event.url);
   }
 
   circularIncrement() {
@@ -52,6 +70,7 @@ export class App extends Component {
     }
     this.setState({ index: newIndex });
   }
+
   parseFile(filePath) {
     //const filePath = 'content://com.android.externalstorage.documents/document/primary%3ADownload%2FdrivebyContacts.csv';
     try {
