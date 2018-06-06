@@ -12,6 +12,9 @@ import RNFS from 'react-native-fs';
 import { Table, Row, Rows } from 'react-native-table-component';
 //https://www.npmjs.com/package/react-native-table-component  - consider replacing this with NativeBase?
 
+import RNImmediatePhoneCall from 'react-native-immediate-phone-call';
+// https://www.npmjs.com/package/react-native-immediate-phone-call
+
 import Papa from 'papaparse';
 
 import { PhoneCaller, TestExport } from './src/components/NativeModules';
@@ -36,7 +39,7 @@ export class App extends Component {
      console.log(this.props.fileName);
      this.parseFile(this.props.fileName);
   }
-  
+
   componentDidMount() { // B
     if (Platform.OS === 'android') {
       // Linking.getInitialURL().then(url => {
@@ -52,11 +55,23 @@ export class App extends Component {
     }
 
     onTextPress() {
-  //    phoneCaller.makeCall('tel:'`this.state.phoneList[this.state.index][1]`);
-      //PhoneCaller.makeCall('tel:7988956271');
-      this.circularIncrement();
+     // PhoneCaller.makeCall('tel:'`this.state.phoneList[this.state.index][1]`);
 
-      TestExport.testConsole();
+     // PhoneCaller.makeCall('tel:7988956271'); //Android
+
+    if (Platform.OS === 'android') {
+      PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
+    } else {
+        Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
+          .catch((err) => Promise.reject(err));
+    }
+
+      // Linking.openURL('tel:9788956271').catch((err) => Promise.reject(err));
+
+      this.circularIncrement();
+      console.log("Logged stuff!########");
+
+      // TestExport.testConsole();
     }
 
   handleOpenURL = (event) => { // D
@@ -90,9 +105,6 @@ export class App extends Component {
   }
 
   render() {
-    // console.log(this.props);
-    // console.log(this.state.phoneList);
-    //RNImmediatePhoneCall.immediatePhoneCall('0123456789');
       return (
         //https://github.com/StephenGrider/ReactNativeReduxCasts/blob/master/manager/src/Router.js
     //    <Router />  // Need to pass the state to DriveByHome

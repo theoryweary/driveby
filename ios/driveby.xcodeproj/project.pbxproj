@@ -40,6 +40,7 @@
 		9D1CA66020BB7EE800A7E987 /* TestExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D1CA65F20BB7EE800A7E987 /* TestExport.swift */; };
 		9D1CA66120BB7EE800A7E987 /* TestExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D1CA65F20BB7EE800A7E987 /* TestExport.swift */; };
 		9D1CA69920BB94CE00A7E987 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
+		9DB13EDD20C75B9A0065A458 /* libRNImmediatePhoneCall.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9DB13EDC20C75B160065A458 /* libRNImmediatePhoneCall.a */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		F981E68E5AFE4EF98C3A2A3F /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EF9F6F82A2954C74B93DBA0C /* libRNFS.a */; };
 /* End PBXBuildFile section */
@@ -325,6 +326,13 @@
 			remoteGlobalIDString = 6456441F1EB8DA9100672408;
 			remoteInfo = "RNFS-tvOS";
 		};
+		9DB13EDB20C75B160065A458 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9DB13ED720C75B160065A458 /* RNImmediatePhoneCall.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 15209BEF1D250F63000D0F44;
+			remoteInfo = RNImmediatePhoneCall;
+		};
 		ADBDB9261DFEBF0700ED6528 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */;
@@ -363,6 +371,7 @@
 		9D1CA65C20BB7E8A00A7E987 /* TestExportBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = TestExportBridge.m; path = "/Users/brendon-kellner/Desktop/Brendon/ReactNative/driveby/ios/TestExportBridge.m"; sourceTree = "<absolute>"; };
 		9D1CA65F20BB7EE800A7E987 /* TestExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestExport.swift; path = "/Users/brendon-kellner/Desktop/Brendon/ReactNative/driveby/ios/TestExport.swift"; sourceTree = "<absolute>"; };
 		9D1CA66220BB7EEA00A7E987 /* driveby-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "driveby-Bridging-Header.h"; path = "/Users/brendon-kellner/Desktop/Brendon/ReactNative/driveby/ios/driveby-Bridging-Header.h"; sourceTree = "<absolute>"; };
+		9DB13ED720C75B160065A458 /* RNImmediatePhoneCall.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNImmediatePhoneCall.xcodeproj; path = "../node_modules/react-native-immediate-phone-call/ios/RNImmediatePhoneCall.xcodeproj"; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		BA072DA37A334898885FAFDA /* RNFS.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
 		EF9F6F82A2954C74B93DBA0C /* libRNFS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFS.a; sourceTree = "<group>"; };
@@ -381,6 +390,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9DB13EDD20C75B9A0065A458 /* libRNImmediatePhoneCall.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				9D1CA69920BB94CE00A7E987 /* libRCTAnimation.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
@@ -570,6 +580,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				9DB13ED720C75B160065A458 /* RNImmediatePhoneCall.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
 				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
@@ -635,6 +646,14 @@
 			children = (
 				9D1CA65920BB70E200A7E987 /* libRNFS.a */,
 				9D1CA65B20BB70E200A7E987 /* libRNFS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9DB13ED820C75B160065A458 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9DB13EDC20C75B160065A458 /* libRNImmediatePhoneCall.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -814,6 +833,10 @@
 				{
 					ProductGroup = 9D1CA65420BB70E200A7E987 /* Products */;
 					ProjectRef = BA072DA37A334898885FAFDA /* RNFS.xcodeproj */;
+				},
+				{
+					ProductGroup = 9DB13ED820C75B160065A458 /* Products */;
+					ProjectRef = 9DB13ED720C75B160065A458 /* RNImmediatePhoneCall.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1091,6 +1114,13 @@
 			fileType = archive.ar;
 			path = libRNFS.a;
 			remoteRef = 9D1CA65A20BB70E200A7E987 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9DB13EDC20C75B160065A458 /* libRNImmediatePhoneCall.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNImmediatePhoneCall.a;
+			remoteRef = 9DB13EDB20C75B160065A458 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */ = {
