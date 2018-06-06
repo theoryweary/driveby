@@ -6,7 +6,8 @@ import {
   Text,
   View,
   Platform,
-  Linking
+  Linking,
+  AppState
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import { Table, Row, Rows } from 'react-native-table-component';
@@ -34,8 +35,10 @@ export class App extends Component {
       index: 0,
       numContacts: 0,
       tableHead: ['Name', 'Number'],
-      phoneList: [['', '']]
+      phoneList: [['', '']],
+      appState: AppState.currentState,
      };
+
      console.log(this.props.fileName);
      this.parseFile(this.props.fileName);
   }
@@ -48,11 +51,22 @@ export class App extends Component {
     } else {
         Linking.addEventListener('url', this.handleOpenURL);
       }
+      AppState.addEventListener('change', this.handleAppStateChange);
     }
 
     componentWillUnmount() { // C
       Linking.removeEventListener('url', this.handleOpenURL);
+      AppState.removeEventListener('change', this.handleAppStateChange);
     }
+
+    handleAppStateChange = (nextAppState) => {
+   if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+     console.log('App has come to the foreground!');
+     ///
+     this.onTextPress();  //This triggers the phone call and circularIncrement, but seems to have broken the phone call.
+   }
+   this.setState({ appState: nextAppState });
+ }
 
     onTextPress() {
      // PhoneCaller.makeCall('tel:'`this.state.phoneList[this.state.index][1]`);
@@ -73,6 +87,9 @@ export class App extends Component {
 
       // TestExport.testConsole();
     }
+
+
+
 
   handleOpenURL = (event) => { // D
     this.parseFile(event.url);
