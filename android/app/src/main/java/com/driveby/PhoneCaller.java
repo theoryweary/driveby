@@ -13,7 +13,7 @@ import android.Manifest;
 import android.support.v4.content.ContextCompat;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
-
+import java.lang.Thread;
 
 public class PhoneCaller extends ReactContextBaseJavaModule {
 
@@ -53,14 +53,20 @@ public class PhoneCaller extends ReactContextBaseJavaModule {
          }
      } else {
          // Permission has already been granted
+
          Intent intent = new Intent(Intent.ACTION_CALL);
          intent.setData(Uri.parse(phoneNumber));
          getReactApplicationContext().startActivity(intent);
          Log.w(phoneNumber, "############################arg2");
+
+         try
+        {
+            Thread.sleep(5000);
+        }
+        catch(InterruptedException e)
+        {
+             Log.w("############","Thrown exception in Sleep");
+        }
      }
-
-
-
   }
-
 }

@@ -13,12 +13,9 @@ import RNFS from 'react-native-fs';
 import { Table, Row, Rows } from 'react-native-table-component';
 //https://www.npmjs.com/package/react-native-table-component  - consider replacing this with NativeBase?
 
-import RNImmediatePhoneCall from 'react-native-immediate-phone-call';
-// https://www.npmjs.com/package/react-native-immediate-phone-call
-
 import Papa from 'papaparse';
 
-import { PhoneCaller, TestExport } from './src/components/NativeModules';
+import { PhoneCaller } from './src/components/NativeModules';
 import { Card, CardSection, Button } from './src/common';
 import Header from './src/common/Header';
 //import Router from './src/router';
@@ -27,68 +24,83 @@ import Header from './src/common/Header';
 // create a component
 export class App extends Component {
   constructor(props) {
-    console.log(props);
-    console.log('#############################');
     super(props);
-
+    // this.handleAppStateChange = this.handleAppStateChange.bind(this);
     this.state = {
       index: 0,
       numContacts: 0,
       tableHead: ['Name', 'Number'],
       phoneList: [['', '']],
       appState: AppState.currentState,
+      autoDial: false,
+      inCall: false,
      };
 
      console.log(this.props.fileName);
-     this.parseFile(this.props.fileName);
   }
 
   componentDidMount() { // B
     if (Platform.OS === 'android') {
-      // Linking.getInitialURL().then(url => {
-      //   this.navigate(url);
-      // });
+      console.log('Platform android');
+      Linking.getInitialURL().then(url => {
+        console.log('Get initial url Ran');
+        if (url) {
+            this.parseFile(url);
+            console.log('Parseurl Ran');
+        }
+      });
     } else {
         Linking.addEventListener('url', this.handleOpenURL);
-      }
-      AppState.addEventListener('change', this.handleAppStateChange);
     }
 
-    componentWillUnmount() { // C
+    console.log('componentDidMount')
+    AppState.addEventListener('change', this.handleAppStateChange);
+  }
+
+    componentWillUnmount() {
       Linking.removeEventListener('url', this.handleOpenURL);
       AppState.removeEventListener('change', this.handleAppStateChange);
+      console.log('componentWillUnmount')
     }
 
     handleAppStateChange = (nextAppState) => {
-   if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-     console.log('App has come to the foreground!');
-     ///
-     this.onTextPress();  //This triggers the phone call and circularIncrement, but seems to have broken the phone call.
+      console.log('nextAppState:');
+      console.log(nextAppState);
+      if (this.state.inCall) { return; }
+
+      if (this.state.appState.match(/inactive|background/) && nextAppState === 'active' && this.state.autoDial ) {
+       console.log('App has come to the foreground!');
+       this.circularIncrement();
+       console.log('circularIncrement');
+
+     // this.onTextPress();  //This triggers the phone call and circularIncreme
    }
+
    this.setState({ appState: nextAppState });
  }
 
+ makeCall() {
+   if (Platform.OS === 'android') {
+     PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
+             console.log('Calling');
+   } else {
+
+       Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
+         .catch((err) => Promise.reject(err));
+   }
+
+   this.setState({ inCall: true });
+ }
+
     onTextPress() {
-     // PhoneCaller.makeCall('tel:'`this.state.phoneList[this.state.index][1]`);
-
-     // PhoneCaller.makeCall('tel:7988956271'); //Android
-
-    if (Platform.OS === 'android') {
-      PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
-    } else {
-        Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
-          .catch((err) => Promise.reject(err));
-    }
-
-      // Linking.openURL('tel:9788956271').catch((err) => Promise.reject(err));
-
-      this.circularIncrement();
-      console.log("Logged stuff!########");
-
+      this.makeCall();
+      this.setState({ autoDial: true });
       // TestExport.testConsole();
     }
 
-
+    onStopCallingButton() {
+      this.setState({ autoDial: false });
+    }
 
 
   handleOpenURL = (event) => { // D
@@ -136,7 +148,7 @@ export class App extends Component {
             </CardSection>
 
             <CardSection>
-                <Button>
+                <Button onPress={this.onStopCallingButton.bind(this)}>
                   Stop Calling
                 </Button>
             </CardSection>
