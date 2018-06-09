@@ -12,7 +12,7 @@ import {
 import RNFS from 'react-native-fs';
 import { Table, Row, Rows } from 'react-native-table-component';
 //https://www.npmjs.com/package/react-native-table-component  - consider replacing this with NativeBase?
-
+import CountDown from 'react-native-countdown-component';
 import Papa from 'papaparse';
 
 import { PhoneCaller } from './src/components/NativeModules';
@@ -23,6 +23,7 @@ import Header from './src/common/Header';
 
 // create a component
 export class App extends Component {
+
   constructor(props) {
     super(props);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
@@ -34,7 +35,10 @@ export class App extends Component {
       appState: AppState.currentState,
       autoDial: false,
       callStartTime: null,
+      callEndTime: null,
       inCall: false,
+      msBetweenCalls: 5000,
+      msToNextCall: 0,
      };
 
      console.log(this.props.fileName);
@@ -78,15 +82,20 @@ export class App extends Component {
        console.log('App has come to the foreground!');
        this.circularIncrement();
        console.log('circularIncrement');
-       this.setState({ callStartTime: null });
+       this.setState({
+         callStartTime: null,
+         callEndTime: new Date(),
+          msToNextCall: this.state.msBetweenCalls
+        });
 
+       this.timeToCall();
        setTimeout(() => {
          if (this.state.autoDial) {
            this.makeCall();  //This triggers the phone call and circularIncreme
          }
        },
-       3000
-      )
+       this.state.msBetweenCalls
+     );
     }
 
    this.setState({ appState: nextAppState });
@@ -98,11 +107,11 @@ export class App extends Component {
 
       PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
          console.log('Calling');
-         this.setState({ callStartTime: new Date() });
+         this.setState({ callStartTime: new Date(), callEndTime: null });
    } else {
 //invsll
        Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
-        .then(this.setState({ callStartTime: new Date() }))
+        .then(this.setState({ callStartTime: new Date(), callEndTime: null }))
          .catch((err) => Promise.reject(err));
    }
 
@@ -150,6 +159,17 @@ export class App extends Component {
     }
   }
 
+  timeToCall = () => {
+    if (!this.state.callEndTime) { return; }
+
+      if ((new Date() - this.state.callEndTime) > this.state.msBetweenCalls) {
+        this.setState({ msToNextCall: 0 });
+      } else {
+        this.setState({ msToNextCall: (this.state.msBetweenCalls - (new Date() - this.state.callEndTime)) });
+        setTimeout(this.timeToCall,
+        100);
+      }
+  }
 
 //Add countdown to next call, possibly option to select time delay to next call.
   render() {
@@ -162,9 +182,11 @@ export class App extends Component {
           <Card>
             <CardSection>
                 <Button onPress={this.onTextPress.bind(this)}>
-                   Call {this.state.phoneList[this.state.index][0] }
+                   {this.state.msToNextCall} Call {this.state.phoneList[this.state.index][0]}
                 </Button>
+                <Text>  </Text>
             </CardSection>
+
 
             <CardSection>
                 <Button onPress={this.onStopCallingButton.bind(this)}>

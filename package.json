@@ -17,6 +17,7 @@
     "react-native-appstate-listener": "^1.0.0",
     "react-native-cache-image": "^1.0.0",
     "react-native-communications": "^2.2.1",
+    "react-native-countdown-component": "^1.6.0",
     "react-native-fs": "^2.9.12",
     "react-native-immediate-phone-call": "^1.0.0",
     "react-native-phone-call": "^1.0.4",
