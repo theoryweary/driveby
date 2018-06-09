@@ -12,7 +12,6 @@ import {
 import RNFS from 'react-native-fs';
 import { Table, Row, Rows } from 'react-native-table-component';
 //https://www.npmjs.com/package/react-native-table-component  - consider replacing this with NativeBase?
-import CountDown from 'react-native-countdown-component';
 import Papa from 'papaparse';
 
 import { PhoneCaller } from './src/components/NativeModules';
@@ -21,7 +20,6 @@ import Header from './src/common/Header';
 //import Router from './src/router';
 //import DriveByHome from './src/components/DriveByHome.js';
 
-// create a component
 export class App extends Component {
 
   constructor(props) {
@@ -102,20 +100,15 @@ export class App extends Component {
  }
 
  makeCall() {
-
    if (Platform.OS === 'android') {
-
       PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
          console.log('Calling');
          this.setState({ callStartTime: new Date(), callEndTime: null });
    } else {
-//invsll
        Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
         .then(this.setState({ callStartTime: new Date(), callEndTime: null }))
          .catch((err) => Promise.reject(err));
    }
-
-
  }
 
     onTextPress() {
@@ -162,16 +155,23 @@ export class App extends Component {
   timeToCall = () => {
     if (!this.state.callEndTime) { return; }
 
-      if ((new Date() - this.state.callEndTime) > this.state.msBetweenCalls) {
-        this.setState({ msToNextCall: 0 });
-      } else {
-        this.setState({ msToNextCall: (this.state.msBetweenCalls - (new Date() - this.state.callEndTime)) });
-        setTimeout(this.timeToCall,
-        100);
-      }
+    const endTimeDiff = new Date() - this.state.callEndTime;
+    if (endTimeDiff > this.state.msBetweenCalls) {
+      this.setState({ msToNextCall: 0 });
+    } else {
+      this.setState({ msToNextCall: (this.state.msBetweenCalls - endTimeDiff) });
+      setTimeout(this.timeToCall,
+      100);
+    }
   }
 
-//Add countdown to next call, possibly option to select time delay to next call.
+  displayTimeToCall() {
+    if (this.state.msToNextCall === 0) { return; }
+//Add Rounding
+    return (`Seconds to next call: ${this.state.msToNextCall / 1000}`);
+    }
+
+//possibly add option to select time delay to next call.
   render() {
       return (
         //https://github.com/StephenGrider/ReactNativeReduxCasts/blob/master/manager/src/Router.js
@@ -182,11 +182,11 @@ export class App extends Component {
           <Card>
             <CardSection>
                 <Button onPress={this.onTextPress.bind(this)}>
-                   {this.state.msToNextCall} Call {this.state.phoneList[this.state.index][0]}
+                    Call {this.state.phoneList[this.state.index][0]}
                 </Button>
-                <Text>  </Text>
             </CardSection>
 
+            <Text> {this.displayTimeToCall()}</Text>
 
             <CardSection>
                 <Button onPress={this.onStopCallingButton.bind(this)}>
