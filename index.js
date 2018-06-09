@@ -25,7 +25,7 @@ import Header from './src/common/Header';
 export class App extends Component {
   constructor(props) {
     super(props);
-    // this.handleAppStateChange = this.handleAppStateChange.bind(this);
+    this.handleAppStateChange = this.handleAppStateChange.bind(this);
     this.state = {
       index: 0,
       numContacts: 0,
@@ -33,6 +33,7 @@ export class App extends Component {
       phoneList: [['', '']],
       appState: AppState.currentState,
       autoDial: false,
+      callStartTime: null,
       inCall: false,
      };
 
@@ -66,30 +67,46 @@ export class App extends Component {
     handleAppStateChange = (nextAppState) => {
       console.log('nextAppState:');
       console.log(nextAppState);
-      if (this.state.inCall) { return; }
 
-      if (this.state.appState.match(/inactive|background/) && nextAppState === 'active' && this.state.autoDial ) {
+      console.log(`Autodial:  ${this.state.autoDial}`);
+      if (!this.state.callStartTime) { return; }
+
+      if ((new Date() - this.state.callStartTime) < 1000) { return; }
+
+// this.state.appState.match(/inactive|background/) &&
+      if (nextAppState === 'active' && this.state.autoDial) {
        console.log('App has come to the foreground!');
        this.circularIncrement();
        console.log('circularIncrement');
+       this.setState({ callStartTime: null });
 
-     // this.onTextPress();  //This triggers the phone call and circularIncreme
-   }
+       setTimeout(() => {
+         if (this.state.autoDial) {
+           this.makeCall();  //This triggers the phone call and circularIncreme
+         }
+       },
+       3000
+      )
+    }
 
    this.setState({ appState: nextAppState });
  }
 
  makeCall() {
-   if (Platform.OS === 'android') {
-     PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
-             console.log('Calling');
-   } else {
 
+   if (Platform.OS === 'android') {
+
+      PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
+         console.log('Calling');
+         this.setState({ callStartTime: new Date() });
+   } else {
+//invsll
        Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
+        .then(this.setState({ callStartTime: new Date() }))
          .catch((err) => Promise.reject(err));
    }
 
-   this.setState({ inCall: true });
+
  }
 
     onTextPress() {
@@ -133,6 +150,8 @@ export class App extends Component {
     }
   }
 
+
+//Add countdown to next call, possibly option to select time delay to next call.
   render() {
       return (
         //https://github.com/StephenGrider/ReactNativeReduxCasts/blob/master/manager/src/Router.js

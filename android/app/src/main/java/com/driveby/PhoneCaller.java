@@ -59,14 +59,7 @@ public class PhoneCaller extends ReactContextBaseJavaModule {
          getReactApplicationContext().startActivity(intent);
          Log.w(phoneNumber, "############################arg2");
 
-         try
-        {
-            Thread.sleep(5000);
-        }
-        catch(InterruptedException e)
-        {
-             Log.w("############","Thrown exception in Sleep");
-        }
+    
      }
   }
 }
