@@ -78,8 +78,8 @@ export class App extends Component {
 // this.state.appState.match(/inactive|background/) &&
       if (nextAppState === 'active' && this.state.autoDial) {
        console.log('App has come to the foreground!');
-       this.circularIncrement();
-       console.log('circularIncrement');
+
+
        this.setState({
          callStartTime: null,
          callEndTime: new Date(),
@@ -104,10 +104,20 @@ export class App extends Component {
       PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
          console.log('Calling');
          this.setState({ callStartTime: new Date(), callEndTime: null });
+         this.circularIncrement();
    } else {
        Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
-        .then(this.setState({ callStartTime: new Date(), callEndTime: null }))
-         .catch((err) => Promise.reject(err));
+        .then((_successMessage) => {
+          console.log(`Linking then statement successs message: ${_successMessage}`);
+          this.setState({ callStartTime: new Date(), callEndTime: null });
+          this.circularIncrement();
+          })
+         .catch((err) => {
+          console.log(`Linking catch statement error: ${err}`);
+           this.setState({ callStartTime: null, autoDial: false })
+         });
+         //When user waits too long to click OK, circularIncrement is not called even though the call goes through on iOS.
+        //This causes the user to call the same person twice
    }
  }
 
@@ -118,7 +128,7 @@ export class App extends Component {
     }
 
     onStopCallingButton() {
-      this.setState({ autoDial: false });
+      this.setState({ autoDial: false, msToNextCall: 0 });
     }
 
 
@@ -132,6 +142,7 @@ export class App extends Component {
       newIndex = 0;
     }
     this.setState({ index: newIndex });
+    console.log('circularIncrement');
   }
 
   parseFile(filePath) {
@@ -167,8 +178,8 @@ export class App extends Component {
 
   displayTimeToCall() {
     if (this.state.msToNextCall === 0) { return; }
-//Add Rounding
-    return (`Seconds to next call: ${this.state.msToNextCall / 1000}`);
+
+    return (`Seconds to next call: ${Math.round(this.state.msToNextCall / 1000)}`);
     }
 
 //possibly add option to select time delay to next call.
