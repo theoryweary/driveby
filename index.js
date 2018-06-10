@@ -13,9 +13,10 @@ import RNFS from 'react-native-fs';
 import { Table, Row, Rows } from 'react-native-table-component';
 //https://www.npmjs.com/package/react-native-table-component  - consider replacing this with NativeBase?
 import Papa from 'papaparse';
+import { Container, Content, Button, Picker, Form } from 'native-base';
 
 import { PhoneCaller } from './src/components/NativeModules';
-import { Card, CardSection, Button } from './src/common';
+import { Card, CardSection, } from './src/common';
 import Header from './src/common/Header';
 //import Router from './src/router';
 //import DriveByHome from './src/components/DriveByHome.js';
@@ -177,10 +178,14 @@ export class App extends Component {
   }
 
   displayTimeToCall() {
-    if (this.state.msToNextCall === 0) { return; }
+    if (this.state.msToNextCall === 0) { return 'Call'; }
 
-    return (`Seconds to next call: ${Math.round(this.state.msToNextCall / 1000)}`);
+    return (`Seconds to next call: ${Math.round(this.state.msToNextCall / 1000)}, calling:`);
     }
+
+  handlemsBetweenCallsPickerUpdate(value) {
+    this.setState({ msBetweenCalls: value });
+  }
 
 //possibly add option to select time delay to next call.
   render() {
@@ -193,7 +198,7 @@ export class App extends Component {
           <Card>
             <CardSection>
                 <Button onPress={this.onTextPress.bind(this)}>
-                    Call {this.state.phoneList[this.state.index][0]}
+                    {this.displayTimeToCall()} {this.state.phoneList[this.state.index][0]}
                 </Button>
             </CardSection>
 
@@ -205,6 +210,25 @@ export class App extends Component {
                 </Button>
             </CardSection>
           </Card>
+
+          <Container>
+            <Content>
+              <Form>
+               <Text>Choose Delay Between Calls</Text>
+                <Picker
+                    iosHeader="Contact Type"
+                    mode="dropdown"
+                    selectedValue={`${this.state.msBetweenCalls / 1000} 'Seconds'`}
+                    onValueChange={this.handlemsBetweenCallsPickerUpdate.bind(this)}
+                >
+                    <Picker.Item label="3 Seconds" value='3000' />
+                    <Picker.Item label="5 Seconds" value='5000' />
+                    <Picker.Item label="10 Seconds" value='10000' />
+                    <Picker.Item label="20 Seconds" value='20000' />
+                  </Picker>
+              </Form>
+            </Content>
+          </Container>
 
           <CardSection>
             <Text>
