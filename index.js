@@ -22,7 +22,6 @@ import Header from './src/common/Header';
 //import DriveByHome from './src/components/DriveByHome.js';
 
 export class App extends Component {
-
   constructor(props) {
     super(props);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
@@ -38,102 +37,99 @@ export class App extends Component {
       inCall: false,
       msBetweenCalls: 5000,
       msToNextCall: 0,
-     };
+    };
 
-     console.log(this.props.fileName);
+    console.log(this.props.fileName);
   }
 
   componentDidMount() { // B
     if (Platform.OS === 'android') {
       console.log('Platform android');
       Linking.getInitialURL().then(url => {
-        console.log('Get initial url Ran');
         if (url) {
-            this.parseFile(url);
-            console.log('Parseurl Ran');
+          this.parseFile(url);
         }
       });
     } else {
-        Linking.addEventListener('url', this.handleOpenURL);
+      Linking.addEventListener('url', this.handleOpenURL);
     }
 
-    console.log('componentDidMount')
+    console.log('componentDidMount');
     AppState.addEventListener('change', this.handleAppStateChange);
   }
 
-    componentWillUnmount() {
-      Linking.removeEventListener('url', this.handleOpenURL);
-      AppState.removeEventListener('change', this.handleAppStateChange);
-      console.log('componentWillUnmount')
+  componentWillUnmount() {
+    Linking.removeEventListener('url', this.handleOpenURL);
+    AppState.removeEventListener('change', this.handleAppStateChange);
+    console.log('componentWillUnmount');
+  }
+
+  handleAppStateChange = (nextAppState) => {
+    console.log('nextAppState:');
+    console.log(nextAppState);
+
+    console.log(`Autodial:  ${this.state.autoDial}`);
+    if (!this.state.callStartTime) { return; }
+
+    if ((new Date() - this.state.callStartTime) < 1000) { return; }
+
+    if (nextAppState === 'active' && this.state.autoDial) {
+      console.log('App has come to the foreground!');
+
+      this.setState({
+        callStartTime: null,
+        callEndTime: new Date(),
+        msToNextCall: this.state.msBetweenCalls
+      });
+
+      this.timeToCall();
+      setTimeout(() => {
+        if (this.state.autoDial) {
+          this.makeCall(); //This triggers the phone call and circularIncreme
+        }
+      },
+      this.state.msBetweenCalls
+      );
     }
 
-    handleAppStateChange = (nextAppState) => {
-      console.log('nextAppState:');
-      console.log(nextAppState);
+    this.setState({ appState: nextAppState });
+  }
 
-      console.log(`Autodial:  ${this.state.autoDial}`);
-      if (!this.state.callStartTime) { return; }
-
-      if ((new Date() - this.state.callStartTime) < 1000) { return; }
-
-// this.state.appState.match(/inactive|background/) &&
-      if (nextAppState === 'active' && this.state.autoDial) {
-       console.log('App has come to the foreground!');
-
-
-       this.setState({
-         callStartTime: null,
-         callEndTime: new Date(),
-          msToNextCall: this.state.msBetweenCalls
-        });
-
-       this.timeToCall();
-       setTimeout(() => {
-         if (this.state.autoDial) {
-           this.makeCall();  //This triggers the phone call and circularIncreme
-         }
-       },
-       this.state.msBetweenCalls
-     );
-    }
-
-   this.setState({ appState: nextAppState });
- }
-
- makeCall() {
-   if (Platform.OS === 'android') {
+  makeCall() {
+    if (Platform.OS === 'android') {
       PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
-         console.log('Calling');
-         this.setState({ callStartTime: new Date(), callEndTime: null });
-         this.circularIncrement();
-   } else {
-       Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
-        .then((_successMessage) => {
-          console.log(`Linking then statement successs message: ${_successMessage}`);
-          this.setState({ callStartTime: new Date(), callEndTime: null });
-          this.circularIncrement();
-          })
-         .catch((err) => {
-          console.log(`Linking catch statement error: ${err}`);
-           this.setState({ callStartTime: null, autoDial: false })
-         });
-         //When user waits too long to click OK, circularIncrement is not called even though the call goes through on iOS.
-        //This causes the user to call the same person twice
-   }
- }
+      console.log('Calling');
+      this.setState({ callStartTime: new Date(), callEndTime: null });
+      this.circularIncrement();
+    } else {
+      Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
+      .then((_successMessage) => {
+        console.log(`Linking then statement successs message: ${_successMessage}`);
+        this.setState({ callStartTime: new Date(), callEndTime: null });
+        this.circularIncrement();
+      })
+      .catch((err) => {
+        console.log(`Linking catch statement error: ${err}`);
+        this.setState({ callStartTime: null, autoDial: false });
+      });
 
-    onTextPress() {
-      this.makeCall();
-      this.setState({ autoDial: true });
-      // TestExport.testConsole();
+      //When user waits too long to click OK, circularIncrement is not called even though the call goes through on iOS.
+      //This causes the user to call the same person twice
     }
-
-    onStopCallingButton() {
-      this.setState({ autoDial: false, msToNextCall: 0 });
-    }
+  }
 
 
-  handleOpenURL = (event) => { // D
+  onTextPress() {
+    this.makeCall();
+    this.setState({ autoDial: true });
+  }
+
+  onStopCallingButton() {
+    this.setState({ autoDial: false, msToNextCall: 0 });
+  }
+
+
+  handleOpenURL = (event) => {
     this.parseFile(event.url);
   }
 
@@ -173,7 +169,7 @@ export class App extends Component {
     } else {
       this.setState({ msToNextCall: (this.state.msBetweenCalls - endTimeDiff) });
       setTimeout(this.timeToCall,
-      100);
+        100);
     }
   }
 
@@ -181,18 +177,14 @@ export class App extends Component {
     if (this.state.msToNextCall === 0) { return 'Call'; }
 
     return (`Seconds to next call: ${Math.round(this.state.msToNextCall / 1000)}, calling:`);
-    }
+  }
 
   handlemsBetweenCallsPickerUpdate(value) {
     this.setState({ msBetweenCalls: value });
   }
 
-//possibly add option to select time delay to next call.
   render() {
-      return (
-        //https://github.com/StephenGrider/ReactNativeReduxCasts/blob/master/manager/src/Router.js
-    //    <Router />  // Need to pass the state to DriveByHome
-    //    <DriveByHome />
+    return (
         <View style={styles.mainViewStyle}>
           <Header style={{ flex: 1 }} headerText={'Driveby'} />
           <Card>
@@ -210,7 +202,6 @@ export class App extends Component {
                 </Button>
             </CardSection>
           </Card>
-
           <Container>
             <Content>
               <Form>
@@ -229,7 +220,6 @@ export class App extends Component {
               </Form>
             </Content>
           </Container>
-
           <CardSection>
             <Text>
               Name: {this.state.phoneList[this.state.index][0] }
@@ -239,7 +229,6 @@ export class App extends Component {
                   - this.state.index }
             </Text>
           </CardSection>
-
           <ScrollView style={styles.scrollViewStyle}>
             <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
               <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text} />
@@ -248,6 +237,7 @@ export class App extends Component {
           </ScrollView>
         </View>
      );
+  }
   }
 }
 
