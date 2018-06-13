@@ -1,53 +1,64 @@
+import React from 'react';
+import {} from 'react-native';
 
-import React, { Component } from 'react';
-//https://www.npmjs.com/package/react-native-table-component
+
+import { Container, Content, Button, Picker, Form } from 'native-base';
 import { Table, Row, Rows } from 'react-native-table-component';
+//https://www.npmjs.com/package/react-native-table-component  - consider replacing this with NativeBase?
 
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-import { Card, CardSection, Button, Header } from '../common';
+import Header from './src/common/Header';
+
 
 class DriveByHome extends Component {
   render() {
     return (
-      <View style={styles.mainViewStyle}>
-        <Header style={{ flex: 1 }} headerText={'Driveby'} />
-        <Card>
-          <CardSection>
-              <Button onPress={this.onTextPress.bind(this)}>
-                 Call {this.state.phoneList[this.state.index][0] }
-              </Button>
-          </CardSection>
+        <View style={styles.mainViewStyle}>
+          <Header style={{ flex: 1 }} headerText={'Driveby'} />
+          <Card>
+            <CardSection>
+                <Button onPress={this.onCallButtonPress.bind(this)}>
+                  <Text> {this.callButtonText()} </Text>
+                </Button>
+            </CardSection>
 
-          <CardSection>
-              <Button>
-                Stop Calling
-              </Button>
-          </CardSection>
-        </Card>
+            <Text> {this.displayStartCallCountdownUI()}</Text>
 
-        <CardSection>
-          <Text>
-            Name: {this.state.phoneList[this.state.index][0] }
-            {'\n'} Number: { this.state.phoneList[this.state.index][1] }
-            {'\n'} Contacts Loaded: { this.state.numContacts }
-            {'\n'} # Contacts left to call: { this.state.numContacts
-                - this.state.index }
-          </Text>
-        </CardSection>
+            <CardSection>
+                <Button onPress={this.onStopCallingButton.bind(this)}>
+                <Text> Stop Calling </Text>
+                </Button>
+            </CardSection>
+          </Card>
 
-        <ScrollView style={styles.scrollViewStyle}>
-          <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-            <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text} />
-            <Rows data={this.state.phoneList} textStyle={styles.text} />
-          </Table>
-        </ScrollView>
-      </View>
-    );
+
+          <Container>
+            <Content>
+              <Form>
+               <Text>Choose Delay Between Calls</Text>
+                <Picker
+                    iosHeader="Contact Type"
+                    mode="dropdown"
+                    selectedValue={`${this.state.msBetweenCalls / 1000} 'Seconds'`}
+                    onValueChange={this.handlemsBetweenCallsPickerUpdate.bind(this)}
+                >
+                    <Picker.Item label="3 Seconds" value='3000' />
+                    <Picker.Item label="5 Seconds" value='5000' />
+                    <Picker.Item label="10 Seconds" value='10000' />
+                    <Picker.Item label="20 Seconds" value='20000' />
+                  </Picker>
+              </Form>
+            </Content>
+          </Container>
+
+
+          <ScrollView style={styles.scrollViewStyle}>
+            <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+              <Row data={['Name', 'Number']} style={styles.head} textStyle={styles.text} />
+              <Rows data={this.state.phoneList} textStyle={styles.text} />
+            </Table>
+          </ScrollView>
+        </View>
+     );
   }
 }
 

@@ -1,24 +1,21 @@
 import React, { Component } from 'react';
 import {
   AppRegistry,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+  // StyleSheet,
   Platform,
   Linking,
   AppState
 } from 'react-native';
 import RNFS from 'react-native-fs';
-import { Table, Row, Rows } from 'react-native-table-component';
-//https://www.npmjs.com/package/react-native-table-component  - consider replacing this with NativeBase?
 import Papa from 'papaparse';
-import { Container, Content, Button, Picker, Form } from 'native-base';
 
 import { PhoneCaller } from './src/components/NativeModules';
-import { Card, CardSection, } from './src/common';
-import Header from './src/common/Header';
-//import Router from './src/router';
+
+import { Card, Container, Content, Button, Picker, Form, Text,
+  Header, Left, Body, Right, Icon, Title, Subtitle,
+  List, ListItem, Switch
+} from 'native-base';
+
 //import DriveByHome from './src/components/DriveByHome.js';
 
 export class App extends Component {
@@ -131,8 +128,7 @@ export class App extends Component {
     }
   }
 
-
-  onTextPress() {
+  onCallButtonPress() {
     this.makeCall();
     this.setState({ autoDial: true });
   }
@@ -157,18 +153,24 @@ export class App extends Component {
   parseFile(filePath) {
     try {
       RNFS.readFile(filePath).then((contents) => {
-        console.log(contents);
         this.setState({
           phoneList: Papa.parse(contents).data
         });
-        this.setState({
-          numContacts: this.state.phoneList.length
-        });
       });
+      this.addCallSwitchValue();
     } catch (e) {
       console.log(e);
     }
   }
+
+addCallSwitchValue() {
+  // Add a third boolean value to every array in the phoneList array (each contact is an array)
+  const phoneListWithSelectorValue = this.state.phoneList.map(x => x.push(true));
+  this.setState({
+    phoneList: phoneListWithSelectorValue
+  });
+  console.log(this.state.phoneList);
+}
 
   startCallInXTime(msBetweenCalls) {
     setTimeout(
@@ -211,77 +213,103 @@ export class App extends Component {
 
 
   handlemsBetweenCallsPickerUpdate(value) {
-    this.setState({ msBetweenCalls: value });
+    this.setState({ msBetweenCalls: Number(value) });
   }
 
-  // <Text>
-  //   Name: {this.state.phoneList[this.state.index][0] }
-  //   {'\n'} Number: { this.state.phoneList[this.state.index][1] }
-  //   {'\n'} Contacts Loaded: { this.state.phoneList.length }
-  //   {'\n'} # Contacts left to call: { this.state.phoneList.length
-  //       - this.state.index }
-  // </Text>
-  //
+
+
+// <ScrollView style={styles.scrollViewStyle}>
+// <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+//   <Row data={['Name', 'Number']} style={styles.head} textStyle={styles.text} />
+//   <Rows data={this.state.phoneList} textStyle={styles.text} />
+// </Table>
+// </ScrollView>
+
+
+displayPhonelistSummary() {
+    return `Contacts Loaded: ${this.state.phoneList.length}
+    ${'\n'} # Contacts left to call: ${this.state.phoneList.length
+        - this.state.index}`;
+}
+
   render() {
     return (
-        <View style={styles.mainViewStyle}>
-          <Header style={{ flex: 1 }} headerText={'Driveby'} />
-          <Card>
-            <CardSection>
-                <Button onPress={this.onTextPress.bind(this)}>
-                  <Text> {this.callButtonText()} </Text>
-                </Button>
-            </CardSection>
 
-            <Text> {this.displayStartCallCountdownUI()}</Text>
+        <Container>
+          <Header>
+            <Body>
+              <Title>DriveBuySales</Title>
+              <Subtitle>Hit the gas and close the deal.</Subtitle>
+            </Body>
+            <Right>
+              <Button transparent>
+                <Icon name='menu' />
+              </Button>
+            </Right>
+          </Header>
 
-            <CardSection>
-                <Button onPress={this.onStopCallingButton.bind(this)}>
+          <Content>
+            <Card>
+              <Button full Light onPress={this.onCallButtonPress.bind(this)}>
+                <Text> {this.callButtonText()} </Text>
+              </Button>
+
+              <Text> {this.displayStartCallCountdownUI()}</Text>
+
+              <Button full onPress={this.onStopCallingButton.bind(this)}>
                 <Text> Stop Calling </Text>
-                </Button>
-            </CardSection>
-          </Card>
+              </Button>
 
 
-          <Container>
-            <Content>
-              <Form>
-               <Text>Choose Delay Between Calls</Text>
-                <Picker
-                    iosHeader="Contact Type"
-                    mode="dropdown"
-                    selectedValue={`${this.state.msBetweenCalls / 1000} 'Seconds'`}
-                    onValueChange={this.handlemsBetweenCallsPickerUpdate.bind(this)}
-                >
-                    <Picker.Item label="3 Seconds" value='3000' />
-                    <Picker.Item label="5 Seconds" value='5000' />
-                    <Picker.Item label="10 Seconds" value='10000' />
-                    <Picker.Item label="20 Seconds" value='20000' />
-                  </Picker>
-              </Form>
-            </Content>
-          </Container>
+              <Text style={{ textAlign: 'right' }}> {this.displayPhonelistSummary()} </Text>
+            </Card>
 
 
-          <ScrollView style={styles.scrollViewStyle}>
-            <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-              <Row data={['Name', 'Number']} style={styles.head} textStyle={styles.text} />
-              <Rows data={this.state.phoneList} textStyle={styles.text} />
-            </Table>
-          </ScrollView>
-        </View>
+                <Form>
+                 <Text>Choose Delay Between Calls</Text>
+                  <Picker
+                      iosHeader="Contact Type"
+                      mode="dropdown"
+                      selectedValue={this.state.msBetweenCalls.toString()}
+                      onValueChange={this.handlemsBetweenCallsPickerUpdate.bind(this)}
+                    >
+                      <Picker.Item label="3 Seconds" value='3000' />
+                      <Picker.Item label="5 Seconds" value='5000' />
+                      <Picker.Item label="10 Seconds" value='10000' />
+                      <Picker.Item label="20 Seconds" value='20000' />
+                    </Picker>
+                </Form>
+
+
+              <Card>
+                  <List
+                    dataArray={this.state.phoneList}
+                    renderRow={(item) =>
+                        <ListItem>
+                            <Body>
+                              <Text>{`${item[0]} ${'\n'} ${item[1]}`}</Text>
+                            </Body>
+                            <Right>
+                              <Switch value={false} />
+                            </Right>
+                        </ListItem>
+                    }>
+                  </List>
+              </Card>
+          </Content>
+        </Container>
      );
   }
 }
 
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
-  head: { height: 40, backgroundColor: '#f1f8ff' },
-  text: { margin: 6 },
-  scrollViewStyle: { backgroundColor: '#51FA88' },
-  mainViewStyle: { backgroundColor: '#fff' } //#fff is white  https://htmlcolorcodes.com/
-});
+// const styles = StyleSheet.create({
+//   container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
+//   head: { height: 40, backgroundColor: '#f1f8ff' },
+//   text: { margin: 6 },
+//   scrollViewStyle: { backgroundColor: '#51FA88' },
+//   mainViewStyle: { backgroundColor: '#fff' } //#fff is white  https://htmlcolorcodes.com/
+// });
 
 // render our component to the device
 AppRegistry.registerComponent('driveby', () => App);
