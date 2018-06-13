@@ -37,6 +37,8 @@ export class App extends Component {
   componentDidMount() {
     this.mountAndroid();
     this.mountiOS();
+    this.addCallSwitchValue();
+    // console.log('running handleOpenURL');
     AppState.addEventListener('change', this.handleAppStateChange);
   }
 
@@ -137,7 +139,7 @@ export class App extends Component {
     this.setState({ autoDial: false, msToNextCall: 0 });
   }
 
-
+//Are we still using this function???
   handleOpenURL = (event) => {
     this.parseFile(event.url);
   }
@@ -157,18 +159,22 @@ export class App extends Component {
           phoneList: Papa.parse(contents).data
         });
       });
-      this.addCallSwitchValue();
+
     } catch (e) {
       console.log(e);
     }
   }
 
+
+//This is now working for some reason? - Moved call into ComponentDidMount
 addCallSwitchValue() {
   // Add a third boolean value to every array in the phoneList array (each contact is an array)
-  const phoneListWithSelectorValue = this.state.phoneList.map(x => x.push(true));
+  const phoneListWithSelectorValue = this.state.phoneList.map(val => val.push(true));  //Need to make sure that it only adds one true, eg. x => x[2] = true
+  console.log(`phoneListWithSelectorValue: ${phoneListWithSelectorValue}`);
   this.setState({
     phoneList: phoneListWithSelectorValue
   });
+  console.log('running addCallSwitchValue');
   console.log(this.state.phoneList);
 }
 
@@ -290,7 +296,7 @@ displayPhonelistSummary() {
                               <Text>{`${item[0]} ${'\n'} ${item[1]}`}</Text>
                             </Body>
                             <Right>
-                              <Switch value={false} />
+                              <Switch value={item[2]} />
                             </Right>
                         </ListItem>
                     }>
