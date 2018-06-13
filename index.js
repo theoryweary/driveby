@@ -27,22 +27,23 @@ export class App extends Component {
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
     this.state = {
       index: 0,
-      numContacts: 0,
-      tableHead: ['Name', 'Number'],
-      phoneList: [['', '']],
+      phoneList: [], //['', '']
       appState: AppState.currentState,
       autoDial: false,
       callStartTime: null,
       callEndTime: null,
-      inCall: false,
       msBetweenCalls: 5000,
       msToNextCall: 0,
     };
-
-    console.log(this.props.fileName);
   }
 
-  componentDidMount() { // B
+  componentDidMount() {
+    this.mountAndroid();
+    this.mountiOS();
+    AppState.addEventListener('change', this.handleAppStateChange);
+  }
+
+  mountAndroid() {
     if (Platform.OS === 'android') {
       console.log('Platform android');
       Linking.getInitialURL().then(url => {
@@ -50,66 +51,78 @@ export class App extends Component {
           this.parseFile(url);
         }
       });
-    } else {
-      Linking.addEventListener('url', this.handleOpenURL);
     }
+  }
 
-    console.log('componentDidMount');
-    AppState.addEventListener('change', this.handleAppStateChange);
+  mountiOS() {
+    if (Platform.OS === 'ios') {
+         Linking.addEventListener('url', this.handleOpenURL);
+       }
   }
 
   componentWillUnmount() {
-    Linking.removeEventListener('url', this.handleOpenURL);
+    unmountiOS();
     AppState.removeEventListener('change', this.handleAppStateChange);
-    console.log('componentWillUnmount');
   }
 
+  unmountiOS() {
+    if (Platform.OS === 'ios') {
+      Linking.removeEventListener('url', this.handleOpenURL);
+    }
+  }
+
+  resetBetweenCalls() {
+    this.setState({
+      callStartTime: null,
+      callEndTime: new Date(),
+      msToNextCall: this.state.msBetweenCalls
+    })
+  }
+
+
   handleAppStateChange = (nextAppState) => {
-    console.log('nextAppState:');
-    console.log(nextAppState);
+    const callIsNotInitiatied = !this.state.callStartTime;
+    if (callIsNotInitiatied) { return; }
 
-    console.log(`Autodial:  ${this.state.autoDial}`);
-    if (!this.state.callStartTime) { return; }
+    //App state flips twice when first making the call, so we need to wait a second before checking.
+    const appStateNotSettled  = (new Date() - this.state.callStartTime) < 1000;
+    if ( appStateNotSettled) { return; }
 
-    if ((new Date() - this.state.callStartTime) < 1000) { return; }
+    const returnsToApp = nextAppState === 'active';
+    if (returnsToApp && this.state.autoDial) {
+      this.resetBetweenCalls();
 
-    if (nextAppState === 'active' && this.state.autoDial) {
-      console.log('App has come to the foreground!');
+      this.startCallCountdownUI();
 
-      this.setState({
-        callStartTime: null,
-        callEndTime: new Date(),
-        msToNextCall: this.state.msBetweenCalls
-      });
-
-      this.timeToCall();
-      setTimeout(() => {
-        if (this.state.autoDial) {
-          this.makeCall(); //This triggers the phone call and circularIncreme
-        }
-      },
-      this.state.msBetweenCalls
-      );
+      this.startCallInXTime(this.state.msBetweenCalls);
     }
 
-    this.setState({ appState: nextAppState });
+    this.setState({ appState: nextAppState }); //necessary for AppState
   }
 
   makeCall() {
+    if (this.state.autoDial) {
+      this.circularIncrement();
+      this.makeCallAndroid();
+      this.makeCalliOS();
+    }
+  }
+
+  makeCallAndroid() {
     if (Platform.OS === 'android') {
       PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
-      console.log('Calling');
       this.setState({ callStartTime: new Date(), callEndTime: null });
-      this.circularIncrement();
-    } else {
+    }
+  }
+
+  makeCalliOS() {
+    if (Platform.OS === 'ios') {
       Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
       .then((_successMessage) => {
-        console.log(`Linking then statement successs message: ${_successMessage}`);
         this.setState({ callStartTime: new Date(), callEndTime: null });
         this.circularIncrement();
       })
       .catch((err) => {
-        console.log(`Linking catch statement error: ${err}`);
         this.setState({ callStartTime: null, autoDial: false });
       });
 
@@ -139,18 +152,15 @@ export class App extends Component {
       newIndex = 0;
     }
     this.setState({ index: newIndex });
-    console.log('circularIncrement');
   }
 
   parseFile(filePath) {
-    //const filePath = 'content://com.android.externalstorage.documents/document/primary%3ADownload%2FdrivebyContacts.csv';
     try {
       RNFS.readFile(filePath).then((contents) => {
         console.log(contents);
         this.setState({
           phoneList: Papa.parse(contents).data
         });
-        //Set numContacts after loading the phonelist
         this.setState({
           numContacts: this.state.phoneList.length
         });
@@ -160,7 +170,16 @@ export class App extends Component {
     }
   }
 
-  timeToCall = () => {
+  startCallInXTime(msBetweenCalls) {
+    setTimeout(
+      () => {
+        this.makeCall();
+      },
+      msBetweenCalls
+    );
+  }
+
+  startCallCountdownUI = () => {
     if (!this.state.callEndTime) { return; }
 
     const endTimeDiff = new Date() - this.state.callEndTime;
@@ -173,16 +192,36 @@ export class App extends Component {
     }
   }
 
-  displayTimeToCall() {
+  displayStartCallCountdownUI() {
     if (this.state.msToNextCall === 0) { return 'Call'; }
 
-    return (`Seconds to next call: ${Math.round(this.state.msToNextCall / 1000)}, calling:`);
+    return (
+      `Seconds to next call: ${Math.round(this.state.msToNextCall / 1000)}, calling:`
+    );
   }
+
+//disable call button if no contacts are added
+  callButtonText() {
+    if (this.state.phoneList.length === 0) {
+      return 'Load some contacts';
+    }
+
+      return  `Call: ${this.state.phoneList[this.state.index][0]}`;
+    }
+
 
   handlemsBetweenCallsPickerUpdate(value) {
     this.setState({ msBetweenCalls: value });
   }
 
+  // <Text>
+  //   Name: {this.state.phoneList[this.state.index][0] }
+  //   {'\n'} Number: { this.state.phoneList[this.state.index][1] }
+  //   {'\n'} Contacts Loaded: { this.state.phoneList.length }
+  //   {'\n'} # Contacts left to call: { this.state.phoneList.length
+  //       - this.state.index }
+  // </Text>
+  //
   render() {
     return (
         <View style={styles.mainViewStyle}>
@@ -190,18 +229,20 @@ export class App extends Component {
           <Card>
             <CardSection>
                 <Button onPress={this.onTextPress.bind(this)}>
-                    {this.displayTimeToCall()} {this.state.phoneList[this.state.index][0]}
+                  <Text> {this.callButtonText()} </Text>
                 </Button>
             </CardSection>
 
-            <Text> {this.displayTimeToCall()}</Text>
+            <Text> {this.displayStartCallCountdownUI()}</Text>
 
             <CardSection>
                 <Button onPress={this.onStopCallingButton.bind(this)}>
-                  Stop Calling
+                <Text> Stop Calling </Text>
                 </Button>
             </CardSection>
           </Card>
+
+
           <Container>
             <Content>
               <Form>
@@ -220,26 +261,19 @@ export class App extends Component {
               </Form>
             </Content>
           </Container>
-          <CardSection>
-            <Text>
-              Name: {this.state.phoneList[this.state.index][0] }
-              {'\n'} Number: { this.state.phoneList[this.state.index][1] }
-              {'\n'} Contacts Loaded: { this.state.numContacts }
-              {'\n'} # Contacts left to call: { this.state.numContacts
-                  - this.state.index }
-            </Text>
-          </CardSection>
+
+
           <ScrollView style={styles.scrollViewStyle}>
             <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-              <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text} />
+              <Row data={['Name', 'Number']} style={styles.head} textStyle={styles.text} />
               <Rows data={this.state.phoneList} textStyle={styles.text} />
             </Table>
           </ScrollView>
         </View>
      );
   }
-  }
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
