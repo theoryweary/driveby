@@ -37,8 +37,6 @@ export class App extends Component {
   componentDidMount() {
     this.mountAndroid();
     this.mountiOS();
-    this.addCallSwitchValue();
-    // console.log('running handleOpenURL');
     AppState.addEventListener('change', this.handleAppStateChange);
   }
 
@@ -48,6 +46,7 @@ export class App extends Component {
       Linking.getInitialURL().then(url => {
         if (url) {
           this.parseFile(url);
+          this.addCallSwitchValue();
         }
       });
     }
@@ -58,6 +57,11 @@ export class App extends Component {
          Linking.addEventListener('url', this.handleOpenURL);
        }
   }
+  //Are we still using this function???  - why not make this part of MountiOS
+    handleOpenURL = (event) => {
+      this.parseFile(event.url);
+      this.addCallSwitchValue();
+    }
 
   componentWillUnmount() {
     unmountiOS();
@@ -84,8 +88,8 @@ export class App extends Component {
     if (callIsNotInitiatied) { return; }
 
     //App state flips twice when first making the call, so we need to wait a second before checking.
-    const appStateNotSettled  = (new Date() - this.state.callStartTime) < 1000;
-    if ( appStateNotSettled) { return; }
+    const appStateNotSettled = (new Date() - this.state.callStartTime) < 1000;
+    if (appStateNotSettled) { return; }
 
     const returnsToApp = nextAppState === 'active';
     if (returnsToApp && this.state.autoDial) {
@@ -109,16 +113,16 @@ export class App extends Component {
 
   makeCallAndroid() {
     if (Platform.OS === 'android') {
-      PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index][1]}`);
+      PhoneCaller.makeCall(`tel:${this.state.phoneList[this.state.index].Number}`);
       this.setState({ callStartTime: new Date(), callEndTime: null });
     }
   }
 
   makeCalliOS() {
     if (Platform.OS === 'ios') {
-      Linking.openURL(`tel:${this.state.phoneList[this.state.index][1]}`)
+      Linking.openURL(`tel:${this.state.phoneList[this.state.index].Number}`)
       .then((_successMessage) => {
-        this.setState({ callStartTime: new Date(), callEndTime: null });
+        // this.setState({ callStartTime: new Date(), callEndTime: null });
         this.circularIncrement();
       })
       .catch((err) => {
@@ -139,11 +143,6 @@ export class App extends Component {
     this.setState({ autoDial: false, msToNextCall: 0 });
   }
 
-//Are we still using this function???
-  handleOpenURL = (event) => {
-    this.parseFile(event.url);
-  }
-
   circularIncrement() {
     let newIndex = this.state.index + 1;
     if (newIndex >= this.state.phoneList.length) {
@@ -156,10 +155,12 @@ export class App extends Component {
     try {
       RNFS.readFile(filePath).then((contents) => {
         this.setState({
-          phoneList: Papa.parse(contents).data
+          phoneList: Papa.parse(contents,
+              { header: true,
+              trimHeaders: false }
+            ).data
         });
       });
-
     } catch (e) {
       console.log(e);
     }
@@ -168,14 +169,16 @@ export class App extends Component {
 
 //This is now working for some reason? - Moved call into ComponentDidMount
 addCallSwitchValue() {
-  // Add a third boolean value to every array in the phoneList array (each contact is an array)
-  const phoneListWithSelectorValue = this.state.phoneList.map(val => val.push(true));  //Need to make sure that it only adds one true, eg. x => x[2] = true
-  console.log(`phoneListWithSelectorValue: ${phoneListWithSelectorValue}`);
+let phoneListWithSelectorValue = this.state.phoneList;
+phoneListWithSelectorValue.forEach((o) => { o.CallSwitchValue = true; })
+
   this.setState({
     phoneList: phoneListWithSelectorValue
   });
-  console.log('running addCallSwitchValue');
-  console.log(this.state.phoneList);
+
+
+  // console.log('running addCallSwitchValue');
+  // console.log(this.state.phoneList);
 }
 
   startCallInXTime(msBetweenCalls) {
@@ -214,7 +217,7 @@ addCallSwitchValue() {
       return 'Load some contacts';
     }
 
-      return  `Call: ${this.state.phoneList[this.state.index][0]}`;
+      return  `Call: ${this.state.phoneList[this.state.index].Name}`;
     }
 
 
@@ -223,19 +226,16 @@ addCallSwitchValue() {
   }
 
 
-
-// <ScrollView style={styles.scrollViewStyle}>
-// <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-//   <Row data={['Name', 'Number']} style={styles.head} textStyle={styles.text} />
-//   <Rows data={this.state.phoneList} textStyle={styles.text} />
-// </Table>
-// </ScrollView>
-
-
 displayPhonelistSummary() {
     return `Contacts Loaded: ${this.state.phoneList.length}
     ${'\n'} # Contacts left to call: ${this.state.phoneList.length
         - this.state.index}`;
+}
+
+onLogPhonelistButton() {
+   this.addCallSwitchValue();
+  console.log('Logging phonelist');
+  console.log(this.state.phoneList);
 }
 
   render() {
@@ -256,6 +256,11 @@ displayPhonelistSummary() {
 
           <Content>
             <Card>
+            <Button full Light onPress={this.onLogPhonelistButton.bind(this)}>
+              <Text> Log phonelist </Text>
+            </Button>
+
+
               <Button full Light onPress={this.onCallButtonPress.bind(this)}>
                 <Text> {this.callButtonText()} </Text>
               </Button>
@@ -293,10 +298,10 @@ displayPhonelistSummary() {
                     renderRow={(item) =>
                         <ListItem>
                             <Body>
-                              <Text>{`${item[0]} ${'\n'} ${item[1]}`}</Text>
+                              <Text>{`${item.Name} ${'\n'} ${item.Number} ${'\n'} ${item.CallSwitchValue}`}</Text>
                             </Body>
                             <Right>
-                              <Switch value={item[2]} />
+                              <Switch value={item.CallSwitchValue} />
                             </Right>
                         </ListItem>
                     }>
