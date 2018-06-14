@@ -11,7 +11,7 @@ import Papa from 'papaparse';
 
 import { PhoneCaller } from './src/components/NativeModules';
 
-import { Card, Container, Content, Button, Picker, Form, Text,
+import { Card, CardItem, Container, Content, Button, Picker, Form, Text,
   Header, Left, Body, Right, Icon, Title, Subtitle,
   List, ListItem, Switch
 } from 'native-base';
@@ -232,6 +232,13 @@ displayPhonelistSummary() {
         - this.state.index}`;
 }
 
+DisplayListRow(item, rowID) {
+  let icon = ''; //why is the linter complaining here? It is used in the next line.
+  if (`s${this.state.index}` === rowID) { icon = '<Icon name=phone>'; }
+  console.log(`RowID: ${rowID}`);  //rowID is coming out as s1 instead of a number - why?  Comparison should still be working though?
+  return `${item.Name} icon ${'\n'} ${item.Number} ${'\n'} ${item.CallSwitchValue}`
+}
+
 onLogPhonelistButton() {
    this.addCallSwitchValue();
   console.log('Logging phonelist');
@@ -256,26 +263,28 @@ onLogPhonelistButton() {
 
           <Content>
             <Card>
-            <Button full Light onPress={this.onLogPhonelistButton.bind(this)}>
-              <Text> Log phonelist </Text>
-            </Button>
-
+              <Button full Light onPress={this.onLogPhonelistButton.bind(this)}>
+                <Text> Log phonelist </Text>
+              </Button>
 
               <Button full Light onPress={this.onCallButtonPress.bind(this)}>
                 <Text> {this.callButtonText()} </Text>
               </Button>
 
+            <CardItem bordered>
               <Text> {this.displayStartCallCountdownUI()}</Text>
-
-              <Button full onPress={this.onStopCallingButton.bind(this)}>
-                <Text> Stop Calling </Text>
-              </Button>
+            </CardItem>
 
 
+            <Button full onPress={this.onStopCallingButton.bind(this)}>
+              <Text> Stop Calling </Text>
+            </Button>
+
+            <CardItem bordered>
               <Text style={{ textAlign: 'right' }}> {this.displayPhonelistSummary()} </Text>
-            </Card>
+            </CardItem>
 
-
+            <CardItem bordered>
                 <Form>
                  <Text>Choose Delay Between Calls</Text>
                   <Picker
@@ -289,23 +298,24 @@ onLogPhonelistButton() {
                       <Picker.Item label="10 Seconds" value='10000' />
                       <Picker.Item label="20 Seconds" value='20000' />
                     </Picker>
-                </Form>
+                  </Form>
+                </CardItem>
 
-
-              <Card>
-                  <List
-                    dataArray={this.state.phoneList}
-                    renderRow={(item) =>
-                        <ListItem>
-                            <Body>
-                              <Text>{`${item.Name} ${'\n'} ${item.Number} ${'\n'} ${item.CallSwitchValue}`}</Text>
-                            </Body>
-                            <Right>
-                              <Switch value={item.CallSwitchValue} />
-                            </Right>
-                        </ListItem>
-                    }>
-                  </List>
+                <CardItem>
+                    <List
+                      dataArray={this.state.phoneList}
+                      renderRow={(item, rowID) =>
+                          <ListItem >
+                              <Body>
+                                <Text>{this.DisplayListRow(item, rowID)}</Text>
+                              </Body>
+                              <Right>
+                                <Switch value={item.CallSwitchValue} />
+                              </Right>
+                          </ListItem>
+                      }>
+                    </List>
+                  </CardItem>
               </Card>
           </Content>
         </Container>
