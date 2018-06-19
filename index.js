@@ -177,9 +177,9 @@ export class App extends Component {
   }
 
   displayTimeToCall() {
-    if (this.state.msToNextCall === 0) { return; }
+    if (this.state.msToNextCall === 0) { return 'Call'; }
 
-    return (`Seconds to next call: ${Math.round(this.state.msToNextCall / 1000)}`);
+    return (`Seconds to next call: ${Math.round(this.state.msToNextCall / 1000)}, calling:`);
     }
 
 //possibly add option to select time delay to next call.
@@ -193,7 +193,7 @@ export class App extends Component {
           <Card>
             <CardSection>
                 <Button onPress={this.onTextPress.bind(this)}>
-                    Call {this.state.phoneList[this.state.index][0]}
+                    {this.displayTimeToCall()} {this.state.phoneList[this.state.index][0]}
                 </Button>
             </CardSection>
 
