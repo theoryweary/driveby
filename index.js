@@ -169,8 +169,12 @@ export class App extends Component {
 
 //This is now working for some reason? - Moved call into ComponentDidMount
 addCallSwitchValue() {
-let phoneListWithSelectorValue = this.state.phoneList;
-phoneListWithSelectorValue.forEach((o) => { o.CallSwitchValue = true; })
+  // const phoneListWithSelectorValue = Object.assign({}, this.state.phoneList);
+  const phoneListWithSelectorValue = this.state.phoneList.map((o) => {
+     // o.CallSwitchValue = true;
+      return Object.assign(o, { CallSwitchValue: true });
+      // return o;
+    })
 
   this.setState({
     phoneList: phoneListWithSelectorValue
@@ -236,14 +240,18 @@ DisplayListRow(item, rowID) {
   let icon = ''; //why is the linter complaining here? It is used in the next line.
   if (`s${this.state.index}` === rowID) { icon = '<Icon name=phone>'; }
   console.log(`RowID: ${rowID}`);  //rowID is coming out as s1 instead of a number - why?  Comparison should still be working though?
-  return `${item.Name} icon ${'\n'} ${item.Number} ${'\n'} ${item.CallSwitchValue}`
+  return `${item.Name} ${'\n'} ${item.Number} ${'\n'} ${item.CallSwitchValue}`
 }
 
 onLogPhonelistButton() {
    this.addCallSwitchValue();
   console.log('Logging phonelist');
   console.log(this.state.phoneList);
+  this.forceUpdate(); //replace this with FlatList
 }
+// <Button full Light onPress={this.onLogPhonelistButton.bind(this)}>
+//   <Text> Log phonelist </Text>
+// </Button>
 
   render() {
     return (
@@ -263,9 +271,7 @@ onLogPhonelistButton() {
 
           <Content>
             <Card>
-              <Button full Light onPress={this.onLogPhonelistButton.bind(this)}>
-                <Text> Log phonelist </Text>
-              </Button>
+
 
               <Button full Light onPress={this.onCallButtonPress.bind(this)}>
                 <Text> {this.callButtonText()} </Text>
